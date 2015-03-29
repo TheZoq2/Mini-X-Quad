@@ -14,14 +14,24 @@ module bracketTest()
 
 //bracketTest();
 
-module armBracket(width, length, height, barWidth, tWidth, tLength, edgeDistance) 
+module armBracket(width, length, height, barWidth, tWidth, tLength, edgeDistance, bracketHeight, inverted=false, bottomBracketHeight=0) 
 {
     difference()
     {
         cube([width, length, height]);
         
-        translate([width / 2 - tWidth /2, edgeDistance, -1])
-        tBracket(barWidth, tWidth, tLength,  height * 2);
+        if(inverted)
+        {
+            translate([width / 2 - tWidth /2, edgeDistance, 0])
+            tBracket(barWidth, tWidth, tLength,  bracketHeight);
+        }
+        else
+        {
+        echo(bracketHeight);
+            !mirror([0,0,1])
+            translate([width / 2 - tWidth /2, edgeDistance, bottomBracketHeight])
+            tBracket(barWidth, tWidth, tLength,  bracketHeight);
+        }
     }
 }
 
@@ -80,7 +90,7 @@ module xt60Holder(bottomThickness, chamferBoth=false)
     screwholeDiameter = 4;
     cornerCutDistance = 4;
 
-    translate([-holderWidth/2, 0, 3])
+    translate([-holderWidth/2, 0, bottomThickness])
     {
         xt60Bottom();
     }
@@ -121,7 +131,7 @@ module xt60Holder(bottomThickness, chamferBoth=false)
     }
 }
 
-module body(fcSize, thickness, bracketHeight, xt60=false, radio=false)
+module body(fcSize, thickness, bracketHeight, bracketStandoffHeight, xt60=false, radio=false, isTop=false, bottomBracketHeight=0)
 {
     bracketWidth = 20;
     bracketLength = 12;
@@ -151,7 +161,8 @@ module body(fcSize, thickness, bracketHeight, xt60=false, radio=false)
         {
             //Center the bracket and move it forward
             translate([-bracketWidth / 2, bracketDistance, 0])
-            armBracket(bracketWidth, bracketLength, bracketHeight, bracketBarWidth, tWidth, tLength, bracketEdgeDistance);
+            armBracket(bracketWidth, bracketLength, bracketHeight, bracketBarWidth, tWidth, tLength, bracketEdgeDistance, bracketStandoffHeight, inverted=isTop, bottomBracketHeight=bottomBracketHeight);
+
         }
     }
     
@@ -228,15 +239,16 @@ STRAP_HOLE_LENGTH = 5;
 
 module bottom()
 {
+    bracketStandoffHeight = 13;
     bracketHeight = 10;
-    body(FC_SIZE, THICKNESS, bracketHeight, xt60 = true, radio = true);
+    body(FC_SIZE, THICKNESS, bracketHeight, bracketStandoffHeight, xt60 = true, radio = true);
 }
 module top()
 {
-    bracketHeight = 3;
+    bracketHeight = 10;
     difference()
     {
-        body(FC_SIZE, THICKNESS, bracketHeight);
+        body(FC_SIZE, THICKNESS, bracketHeight, 5, bottomBracketHeight = 10);
 
         //Battery strap hole
         for(i = [-1,1])
@@ -247,7 +259,7 @@ module top()
     }
 }
 
-bottom();
-//top();
+//bottom();
+top();
 
 //xt60Holder(chamferBoth = true);

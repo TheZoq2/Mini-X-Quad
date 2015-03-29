@@ -112,6 +112,8 @@ module armBracket(width, length, height, barWidth)
     screwholeDiameter = 4;
     difference()
     {
+        translate([0,0,height])
+        mirror([0,0,1])
         translate([0, -length, 0])
         {
             tBracket(barWidth, width, length, height);
