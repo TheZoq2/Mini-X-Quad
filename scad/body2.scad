@@ -1,5 +1,7 @@
 include <brackets.scad>
 
+$fn=20;
+
 //TODO: add tollerance
 
 module bodyPlate(plateSize, thickness, bracketSize)
@@ -59,9 +61,11 @@ module bottomArmBracket(outsideSize, innerDimensions, backWallWidth)
         tBracket(barWidth, innerDimensions[0], innerDimensions[1], innerDimensions[2]);
     }
 }
-module bottomArmBrackets(outsideSize, plateSize, plateThickness, insideSize, backWallWidth)
+
+function getBracketOffset(plateSize, outsideSize) = sqrt(2* pow(plateSize / 2, 2)) - outsideSize[0] / 2 - outsideSize[1];
+module armBrackets(outsideSize, plateSize, plateThickness)
 {
-    bracketOffset = sqrt(2* pow(plateSize / 2, 2)) - outsideSize[0] / 2 - outsideSize[1];
+    bracketOffset = getBracketOffset(plateSize, outsideSize);
     echo(bracketOffset);
     //Translate to the middle of the plate
     translate([plateSize / 2, plateSize / 2, plateThickness])
@@ -71,58 +75,71 @@ module bottomArmBrackets(outsideSize, plateSize, plateThickness, insideSize, bac
         {
             translate([0, bracketOffset, 0])
             {
-                bottomArmBracket(outsideSize, insideSize, backWallWidth);
+                children(0);
             }
         }
     }
 }
-module topArmBrackets(outsideSize, plateSize, plateThickness, insideSize, bottomBracketHeight, backWallWidth)
+module bracketHoles(plateSize, bracketOutsideSize, diameter, bracketWallWidth, bracketBarWidth)
 {
-    bracketOffset = sqrt(2* pow(plateSize / 2, 2)) - outsideSize[0] / 2 - outsideSize[1];
-    echo(bracketOffset);
-    //Translate to the middle of the plate
-    translate([plateSize / 2, plateSize / 2, plateThickness])
+    bracketOffset = getBracketOffset(plateSize, bracketOutsideSize);
+    
+    holeOffset = bracketWallWidth + bracketBarWidth / 2;
+
+    //Translate the whole thing to the center of the plate
+    translate([plateSize/2, plateSize/2, 0])
     for(i = [1:4])
     {
-        rotate(45+90*i)
-        {
-            translate([0, bracketOffset, 0])
-            {
-                topArmBracket(outsideSize, insideSize, bottomBracketHeight, backWallWidth);
-            }
-        }
-    }
-}
-module bracketHoles(outsideSize, bracketInside, diameter, bracketWallWidth)
-{
-    for(i = [1:4])
-    {
-        rotate(45 + 90);
+        rotate(45 + i*90)
+        translate([bracketOffset + holeOffset, 0, -1])
+        cylinder(d=diameter, h=25);
     }
 }
 
 FC_SIZE = 40;
 FC_ADDED = 4;
 A_BRACKET_OUTSIDE = [20,12, 10];
-A_TOP_BRACKET_OUTSIDE = [20,12, 7];
+A_TOP_BRACKET_OUTSIDE = [20,12, 8];
 A_BRACKET_BACK_WALL = 2;
 A_BRACKET_INSIDE = [15, 10, 13];
 A_BRACKET_HEIGHT = 13;
 A_BRACKET_BOOM_WIDTH = 7;
+A_SCREW_DIAMETER = 4;
 
 B_THICKNESS = 3;
 
 PLATE_SIZE = FC_SIZE + FC_ADDED + 2 * sqrt(pow(A_BRACKET_OUTSIDE[0] / 2, 2) + pow(A_BRACKET_OUTSIDE[1], 2));
 
+module basePlate()
+{
+    difference()
+    {
+        union()
+        {
+            bodyPlate(PLATE_SIZE, B_THICKNESS, A_BRACKET_OUTSIDE);
+
+            //armBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS)
+            //bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
+            //Arm brackets
+            children(0)
+            children(1);
+        }
+
+        bracketHoles(PLATE_SIZE, A_BRACKET_OUTSIDE, A_SCREW_DIAMETER, A_BRACKET_BACK_WALL, A_BRACKET_BOOM_WIDTH);
+    }
+}
+
 module bottomPlate()
 {
-    bodyPlate(PLATE_SIZE, B_THICKNESS, A_BRACKET_OUTSIDE);
-    bottomArmBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
+    basePlate()
+    armBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS)
+    bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
 }
 module topPlate()
 {
-    bodyPlate(PLATE_SIZE, B_THICKNESS, A_BRACKET_OUTSIDE);
-    topArmBrackets(A_TOP_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS, A_BRACKET_INSIDE, A_BRACKET_OUTSIDE[2], A_BRACKET_BACK_WALL);
+    basePlate()
+    armBrackets(A_TOP_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS)
+    topArmBracket(A_TOP_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_OUTSIDE[2], A_BRACKET_BACK_WALL);
 }
 
 bottomPlate();
