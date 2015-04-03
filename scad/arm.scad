@@ -16,7 +16,7 @@ module motorBracket(diameter, thickness, screw1Radius, screw2Radius, screwholeRa
 {
     motorShaftDiameter = 7;
     screwheadDiameter = 5;
-    screwheadHoleDepth = 1;
+    screwheadHoleDepth = 3;
     difference()
     {
         cylinder(d=diameter, h=thickness);
@@ -135,7 +135,7 @@ module arm(length, width, flatHeight, wedgeWidth, wedgeStart, wedgeHeight, brack
 module armMotorBracket(armLength, armWidth)
 {
     DIAMETER = 24;
-    BRACKET_THICKNESS = 5;
+    BRACKET_THICKNESS = 7;
     SCREW1_RADIUS = 8;
     SCREW2_RADIUS = 6;
     OFFSET_DISTANCE = DIAMETER / 2 - 3;
