@@ -107,9 +107,18 @@ module armWedge(width, length, wedgeStartHeight, wedgeHeight, armWidth)
     translate([armWidth / 2 - width / 2, 0,wedgeStartHeight])
     wedge(width, length, wedgeHeight);
 }
-module armBracket(width, length, height, barWidth)
+module armBracket(width, length, height, barWidth, angle=0)
 {
+    xOffset = angle < 0 ? width - (cos(angle) * width) : 0;
+    yOffset = angle < 0 ? -sin(angle) * width : 0;
+
+
     screwholeDiameter = 4;
+    //Move the bracket to where it should be after rotation
+    translate([xOffset, yOffset, 0])
+    //translate([width/2, 0, 0]) //Offset to rotate around the correct point
+    rotate(angle)
+    //translate([-width/2, 0, 0])//Reset that offset
     difference()
     {
         translate([0,0,height])
@@ -160,12 +169,13 @@ MESH_HOLE_SIZE = 9;
 OUTSIDE_WIDTH = 3;
 
 BRACKET_WIDTH = 15;
-BRACKET_LENGTH = 10;
+BRACKET_LENGTH = 13; //Original 10
 BRACKET_BAR_WIDTH = 5;
 BRACKET_HEIGHT = 13;
+BRACKET_ANGLE = 15;
 
 
 armBase(WIDTH, LENGTH, HEIGHT, MESH_BAR_WIDTH, MESH_HOLE_SIZE, OUTSIDE_WIDTH);
 armWedge(WEDGE_WIDTH, LENGTH, WEDGE_START, WEDGE_HEIGHT, WIDTH);
-armBracket(BRACKET_WIDTH, BRACKET_LENGTH, BRACKET_HEIGHT, BRACKET_BAR_WIDTH);
+armBracket(BRACKET_WIDTH, BRACKET_LENGTH, BRACKET_HEIGHT, BRACKET_BAR_WIDTH, BRACKET_ANGLE);
 armMotorBracket(LENGTH, WIDTH);

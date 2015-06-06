@@ -179,6 +179,21 @@ module gridPlate(width, length, bottomThickness, gridDistance, screwDiameter, ho
     }
 }
 
+module nazeScrewholes()
+{
+    width = 36;
+    holeEdgeDistance = 2.5;
+    holeDiameter = 1.75;
+    holeHeight = 10;
+
+    for(i = [1:4])
+    {
+        rotate(45 + 90*i)
+        translate([sqrt(2 * pow((width/2), 2)), 0, -1]) //Move them the right distance away from the center
+        cylinder(h=holeHeight, r=holeDiameter);
+    }
+}
+
 FC_SIZE = 40;
 FC_ADDED = 4;
 A_BRACKET_OUTSIDE = [20,12, 10];
@@ -196,6 +211,9 @@ RECEIVERPLATE_LENGTH = 25;
 
 GRIDPLATE_WIDTH = 30;
 GRIDPLATE_LENGTH = 25;
+
+CAMERAPLATE_WIDTH = 40;
+CAMERAPLATE_LENGTH = 25;
 
 SCREWGRID_DISTANCE = 10;
 SCREWGRID_DIAMETER = 4;
@@ -228,6 +246,9 @@ module bottomPlate()
     armBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS)
     bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
 
+
+    //naze screwholes
+
     //Reciever mounting thingy
     translate([PLATE_SIZE / 2, PLATE_SIZE, 0])
     {
@@ -243,9 +264,18 @@ module bottomPlate()
     translate([PLATE_SIZE / 2, 0, 0])
     {
         rotate(180)
-        gridPlate(
+        /*gridPlate(
                 GRIDPLATE_WIDTH,
                 GRIDPLATE_LENGTH,
+                B_THICKNESS,
+                SCREWGRID_DISTANCE,
+                SCREWGRID_DIAMETER,
+                MIN_HOLE_DISTANCE
+            );*/
+        //extensionPlate(CAMERAPLATE_WIDTH, CAMERAPLATE_LENGTH, B_THICKNESS);
+        receiverPlate(
+                RECEIVERPLATE_WIDTH,
+                RECEIVERPLATE_LENGTH,
                 B_THICKNESS,
                 SCREWGRID_DISTANCE,
                 SCREWGRID_DIAMETER,
@@ -266,7 +296,7 @@ module topPlate()
     {
         basePlate()
         armBrackets(A_TOP_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS)
-        topArmBracket(A_TOP_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_OUTSIDE[2], A_BRACKET_BACK_WALL);
+        topArmBracket(A_TOP_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_OUTSIDE[2], A_BRACKET_BACK_WALL)
         
         translate([PLATE_SIZE / 2, PLATE_SIZE / 2, 0])
         for(i = [0,1])
@@ -292,5 +322,4 @@ module topPlate()
 
 bottomPlate();
 translate([80, 80, 0])
-!topPlate();
-
+topPlate();
