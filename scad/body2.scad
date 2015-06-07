@@ -185,11 +185,16 @@ module nazeScrewholes()
     holeEdgeDistance = 2.5;
     holeDiameter = 1.75;
     holeHeight = 10;
+    
+    holeCenterDistance = sqrt(2 * pow((width/2 - holeEdgeDistance), 2));
+
+    echo("Hole center distance");
+    echo(holeCenterDistance);
 
     for(i = [1:4])
     {
         rotate(45 + 90*i)
-        translate([sqrt(2 * pow((width/2), 2)), 0, -1]) //Move them the right distance away from the center
+        translate([holeCenterDistance, 0, -1]) //Move them the right distance away from the center
         cylinder(h=holeHeight, r=holeDiameter);
     }
 }
@@ -242,45 +247,55 @@ module basePlate()
 
 module bottomPlate()
 {
-    basePlate()
-    armBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS)
-    bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
-
-
-    //naze screwholes
-
-    //Reciever mounting thingy
-    translate([PLATE_SIZE / 2, PLATE_SIZE, 0])
+    difference()
     {
-        receiverPlate(
-                RECEIVERPLATE_WIDTH,
-                RECEIVERPLATE_LENGTH,
-                B_THICKNESS,
-                SCREWGRID_DISTANCE,
-                SCREWGRID_DIAMETER,
-                MIN_HOLE_DISTANCE
-            );
-    }
-    translate([PLATE_SIZE / 2, 0, 0])
-    {
-        rotate(180)
-        /*gridPlate(
-                GRIDPLATE_WIDTH,
-                GRIDPLATE_LENGTH,
-                B_THICKNESS,
-                SCREWGRID_DISTANCE,
-                SCREWGRID_DIAMETER,
-                MIN_HOLE_DISTANCE
-            );*/
-        //extensionPlate(CAMERAPLATE_WIDTH, CAMERAPLATE_LENGTH, B_THICKNESS);
-        receiverPlate(
-                RECEIVERPLATE_WIDTH,
-                RECEIVERPLATE_LENGTH,
-                B_THICKNESS,
-                SCREWGRID_DISTANCE,
-                SCREWGRID_DIAMETER,
-                MIN_HOLE_DISTANCE
-            );
+        union()
+        {
+            basePlate()
+            armBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS)
+            bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
+
+
+            //naze screwholes
+
+            //Reciever mounting thingy
+            translate([PLATE_SIZE / 2, PLATE_SIZE, 0])
+            {
+                receiverPlate(
+                        RECEIVERPLATE_WIDTH,
+                        RECEIVERPLATE_LENGTH,
+                        B_THICKNESS,
+                        SCREWGRID_DISTANCE,
+                        SCREWGRID_DIAMETER,
+                        MIN_HOLE_DISTANCE
+                    );
+            }
+            translate([PLATE_SIZE / 2, 0, 0])
+            {
+                rotate(180)
+                /*gridPlate(
+                        GRIDPLATE_WIDTH,
+                        GRIDPLATE_LENGTH,
+                        B_THICKNESS,
+                        SCREWGRID_DISTANCE,
+                        SCREWGRID_DIAMETER,
+                        MIN_HOLE_DISTANCE
+                    );*/
+                //extensionPlate(CAMERAPLATE_WIDTH, CAMERAPLATE_LENGTH, B_THICKNESS);
+                receiverPlate(
+                        RECEIVERPLATE_WIDTH,
+                        RECEIVERPLATE_LENGTH,
+                        B_THICKNESS,
+                        SCREWGRID_DISTANCE,
+                        SCREWGRID_DIAMETER,
+                        MIN_HOLE_DISTANCE
+                    );
+            }
+        }
+        translate([PLATE_SIZE / 2, PLATE_SIZE / 2])
+        {
+            nazeScrewholes();
+        }
     }
 }
 module topPlate()
@@ -320,6 +335,6 @@ module topPlate()
 
 }
 
-bottomPlate();
+!bottomPlate();
 translate([80, 80, 0])
 topPlate();
