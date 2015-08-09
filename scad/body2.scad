@@ -26,7 +26,7 @@ module bodyPlate(plateSize, thickness, bracketSize)
     }
 }
 
-BRACKET_MARGIN = 1;
+BRACKET_MARGIN = 0.8;
 function addInnerMargin(innerDimensions) = [
             innerDimensions[0] + BRACKET_MARGIN,
             innerDimensions[1],
@@ -204,6 +204,7 @@ FC_ADDED = 4;
 A_BRACKET_OUTSIDE = [20,12, 10];
 A_TOP_BRACKET_OUTSIDE = [20,12, 3];
 A_BRACKET_BACK_WALL = 2;
+//A_BRACKET_INSIDE = [15, 10, 13];
 A_BRACKET_INSIDE = [15, 10, 13];
 A_BRACKET_HEIGHT = 13;
 A_BRACKET_BOOM_WIDTH = 7;
@@ -336,5 +337,7 @@ module topPlate()
 }
 
 !bottomPlate();
-translate([80, 80, 0])
-topPlate();
+//translate([80, 80, 0])
+//topPlate();
+//armBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS);
+//bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
