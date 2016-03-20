@@ -1,5 +1,6 @@
 include <brackets.scad>
 include <grid.scad>
+include <Nut.scad>
 
 $fn=20;
 
@@ -179,12 +180,13 @@ module gridPlate(width, length, bottomThickness, gridDistance, screwDiameter, ho
     }
 }
 
-module nazeScrewholes()
+/*
+    Adds 4 children copies where the screwholes on a naze32 board are
+*/
+module nazeScrewholePositions()
 {
     width = 36;
     holeEdgeDistance = 2.5;
-    holeDiameter = 1.75;
-    holeHeight = 10;
     
     holeCenterDistance = sqrt(2 * pow((width/2 - holeEdgeDistance), 2));
 
@@ -194,9 +196,17 @@ module nazeScrewholes()
     for(i = [1:4])
     {
         rotate(45 + 90*i)
-        translate([holeCenterDistance, 0, -1]) //Move them the right distance away from the center
-        cylinder(h=holeHeight, r=holeDiameter);
+        translate([holeCenterDistance, 0, 0]) //Move them the right distance away from the center
+        children(0);
     }
+}
+module nazeScrewholes()
+{
+    holeDiameter = 1.75;
+    holeHeight = 10;
+    
+    nazeScrewholePositions()
+    cylinder(h=holeHeight, r=holeDiameter);
 }
 
 FC_SIZE = 40;
@@ -336,8 +346,167 @@ module topPlate()
 
 }
 
-!bottomPlate();
+//!bottomPlate();
 //translate([80, 80, 0])
 //topPlate();
 //armBrackets(A_BRACKET_OUTSIDE, PLATE_SIZE, B_THICKNESS);
 //bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
+
+RECEIVER_LENGTH = 40;
+Y6_RADIUS = FC_SIZE / 2 + RECEIVER_LENGTH;
+
+module y6Corner(length, thickness, frontWidth, backWidth, bracketOutsideSize)
+{
+    //Calculating the angle of the cutouts
+    cutoffAmount = (backWidth - frontWidth) / 2;
+    turnAngle = atan(cutoffAmount / length);
+
+    translate([-backWidth / 2, 0, 0])
+    {
+        difference()
+        {
+            //Creating the baseplate
+            union()
+            {
+                cube([backWidth, length, thickness]);
+
+                translate([backWidth / 2, length - bracketOutsideSize[1], thickness])
+                children(0);
+            }
+            
+            for(i = [0,1])
+            {
+                translate([-i * backWidth + backWidth,0,-1])
+                mirror([i,0,0])
+                rotate(turnAngle)
+                cube([backWidth, length * 2, thickness * 2]);
+            }
+        }
+    }
+}
+module y6BasePlate(radius, thickness, bracketOutsideSize, fcSize, bracketWallWidth, screwholeDiameter, bracketBoomWidth)
+{
+    centerOffset = 10;
+    difference()
+    {
+        union()
+        {
+            for(i = [0:2])
+            {
+                rotate(i * 120)
+                translate([0,centerOffset,0])
+                y6Corner(radius, thickness, bracketOutsideSize[0], fcSize, bracketOutsideSize)
+                children(0);
+            }
+
+            translate([-fcSize, -fcSize, 0] / 2)
+            cube([fcSize, fcSize, thickness]);
+
+        }
+        for(i = [0:2])
+        {
+            rotate(i * 120)
+            translate([0,radius + centerOffset - bracketOutsideSize[1] + bracketWallWidth + bracketBoomWidth / 2,0])
+            cylinder(h = bracketOutsideSize[2] + thickness + 2, d = screwholeDiameter);
+        }
+    }
+}
+
+module y6BottomPlate()
+{
+    difference()
+    {
+        union()
+        {
+            y6BasePlate(Y6_RADIUS, B_THICKNESS, A_BRACKET_OUTSIDE, FC_SIZE, A_BRACKET_BACK_WALL, A_SCREW_DIAMETER, A_BRACKET_BOOM_WIDTH)
+            bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
+    
+            rotate(180)
+            translate([0,FC_SIZE /2 , 0])
+            receiverPlate(FC_SIZE * 7/6, FC_SIZE * 4 / 3, B_THICKNESS, 0, A_SCREW_DIAMETER, 0);
+        }
+    
+        nazeScrewholes();
+    }
+
+}
+module y6TopPlate()
+{
+    bSlotLength = 30;
+    bSlotWidth = 4;
+    bSlotDistance = 40;
+    thickness = B_THICKNESS;
+    plateSize = FC_SIZE + 10;
+
+    screwholeOffsetX = plateSize / 2 + 5;
+    screwholeOffsetY = 0;
+
+    screwDiameter = A_SCREW_DIAMETER;
+
+    difference()
+    {
+        union()
+        {
+            y6BasePlate(Y6_RADIUS, B_THICKNESS, A_BRACKET_OUTSIDE, plateSize, A_BRACKET_BACK_WALL, screwDiameter, A_BRACKET_BOOM_WIDTH)
+            topArmBracket(A_TOP_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_OUTSIDE[2], A_BRACKET_BACK_WALL)
+    
+            rotate(180)
+            translate([0,FC_SIZE /2 , 0])
+            receiverPlate(FC_SIZE * 7/6, FC_SIZE * 4 / 3, B_THICKNESS, 0, screwDiameter, 0);
+        }
+    
+        //nazeScrewholes();
+        
+        for(i = [-1,1])
+        {
+            translate([bSlotDistance * i / 2 - bSlotWidth / 2, -bSlotLength * 2 / 5, -1])
+            cube([bSlotWidth, bSlotLength, thickness * 2]);
+            
+            for(n = [0:2])
+            {
+                translate([screwholeOffsetX * i, screwholeOffsetY - 10 * n, -1])
+                cylinder(h=thickness * 2, d = screwDiameter);
+            }
+        }
+    }
+}
+
+PDB_RADIUS = 2 * Y6_RADIUS / 3;
+PDB_INNER_THICKNESS = 5;
+PDB_OUTER_THICKNESS = 2;
+PDB_TOTAL_THICKNESS = PDB_INNER_THICKNESS + PDB_OUTER_THICKNESS;
+module triPDB()
+{
+    screwBaseDiameter = 9;
+    difference()
+    {
+        union()
+        {
+            difference()
+            {
+                union()
+                {
+                    y6BasePlate(PDB_RADIUS, PDB_TOTAL_THICKNESS, A_BRACKET_OUTSIDE, FC_SIZE, A_BRACKET_BACK_WALL, 0, A_BRACKET_BOOM_WIDTH);
+            
+                }
+            
+                nazeScrewholes();
+
+                scale(0.9, 0.9, 1)
+                y6BasePlate(PDB_RADIUS, PDB_INNER_THICKNESS, A_BRACKET_OUTSIDE, FC_SIZE, A_BRACKET_BACK_WALL, 0, A_BRACKET_BOOM_WIDTH);
+
+            }
+            nazeScrewholePositions()
+            cylinder(h=PDB_TOTAL_THICKNESS, d=screwBaseDiameter);
+        }
+        
+        translate([0,0,PDB_OUTER_THICKNESS])
+        nazeScrewholePositions()
+        nut(6.2, 100);
+        nazeScrewholes();
+    }
+}
+
+//y6BottomPlate();
+//y6TopPlate();
+triPDB();
