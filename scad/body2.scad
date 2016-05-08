@@ -35,6 +35,7 @@ function addInnerMargin(innerDimensions) = [
             ];
 function addInnerMarginToBoom(boomWidth) = boomWidth + BRACKET_MARGIN;
 
+ARM_BRACKET_EXTENTION = 5;
 module topArmBracket(outsideSize, innerDimensions, bottomBracketHeight, backWallWidth)
 {
     barWidth = addInnerMarginToBoom(5);
@@ -46,7 +47,8 @@ module topArmBracket(outsideSize, innerDimensions, bottomBracketHeight, backWall
     translate([-outsideSize[0] / 2, 0, 0])
     difference()
     {
-        cube(outsideSize);
+        translate([0, -ARM_BRACKET_EXTENTION, 0])
+        cube([0,ARM_BRACKET_EXTENTION,0] + outsideSize);
         
         //Flip the bracket upside down
         translate([0, 0, bracketZOffset])
@@ -67,7 +69,8 @@ module bottomArmBracket(outsideSize, innerDimensions, backWallWidth)
     translate([-outsideSize[0] / 2, 0, 0])
     difference()
     {
-        cube(outsideSize);
+        translate([0,-ARM_BRACKET_EXTENTION,0])
+        cube([0,ARM_BRACKET_EXTENTION,0] + outsideSize);
 
         translate([outsideSize[0] / 2 - innerDimensions[0] / 2, backWallWidth, 0])
         tBracket(barWidth, innerDimensions[0], innerDimensions[1], innerDimensions[2]);
@@ -421,14 +424,15 @@ module y6BottomPlate()
             y6BasePlate(Y6_RADIUS, B_THICKNESS, A_BRACKET_OUTSIDE, FC_SIZE, A_BRACKET_BACK_WALL, A_SCREW_DIAMETER, A_BRACKET_BOOM_WIDTH)
             bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
     
+            receiverPlateLen = FC_SIZE * 3 / 3;
+            //receiverPlateLen = FC_SIZE * 4 / 3;
             rotate(180)
             translate([0,FC_SIZE /2 , 0])
-            receiverPlate(FC_SIZE * 7/6, FC_SIZE * 4 / 3, B_THICKNESS, 0, A_SCREW_DIAMETER, 0);
+            receiverPlate(FC_SIZE * 7/6, receiverPlateLen, B_THICKNESS, 8.3, A_SCREW_DIAMETER, 5);
         }
     
         nazeScrewholes();
     }
-
 }
 module y6TopPlate()
 {
@@ -507,6 +511,6 @@ module triPDB()
     }
 }
 
-//y6BottomPlate();
+y6BottomPlate();
 //y6TopPlate();
-triPDB();
+//triPDB();

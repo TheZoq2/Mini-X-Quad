@@ -3,7 +3,7 @@ $fn = 30;
 module servoCogs()
 {
     length = 5;
-    max_diameter = 6.5;
+    max_diameter = 6.6;
 
     cog_amount = 24;
 
