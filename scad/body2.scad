@@ -1,6 +1,8 @@
 include <brackets.scad>
 include <grid.scad>
 include <Nut.scad>
+include <mesh.scad>
+include <util.scad>
 
 $fn=20;
 
@@ -417,18 +419,38 @@ module y6BasePlate(radius, thickness, bracketOutsideSize, fcSize, bracketWallWid
 
 module y6BottomPlate()
 {
+    gridBarWidth = 4;
+    gridInnerDiameter = 10;
     difference()
     {
         union()
         {
-            y6BasePlate(Y6_RADIUS, B_THICKNESS, A_BRACKET_OUTSIDE, FC_SIZE, A_BRACKET_BACK_WALL, A_SCREW_DIAMETER, A_BRACKET_BOOM_WIDTH)
-            bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
-    
+            lighten(0.75)
+            {
+                y6BasePlate(Y6_RADIUS, B_THICKNESS, A_BRACKET_OUTSIDE, FC_SIZE, A_BRACKET_BACK_WALL, A_SCREW_DIAMETER, A_BRACKET_BOOM_WIDTH)
+                {
+                    bottomArmBracket(A_BRACKET_OUTSIDE, A_BRACKET_INSIDE, A_BRACKET_BACK_WALL);
+                }
+
+                hexGrid(11,11, B_THICKNESS, gridBarWidth, gridInnerDiameter);
+
+                y6BasePlate(Y6_RADIUS, B_THICKNESS, A_BRACKET_OUTSIDE, FC_SIZE, A_BRACKET_BACK_WALL, 0, A_BRACKET_BOOM_WIDTH)
+                {
+                    cube([0,0,0]);
+                }
+            }
+
             receiverPlateLen = FC_SIZE * 3 / 3;
             //receiverPlateLen = FC_SIZE * 4 / 3;
             rotate(180)
             translate([0,FC_SIZE /2 , 0])
-            receiverPlate(FC_SIZE * 7/6, receiverPlateLen, B_THICKNESS, 8.3, A_SCREW_DIAMETER, 5);
+            lighten(0.9)
+            {
+                //receiverPlate(FC_SIZE * 7/6, receiverPlateLen, B_THICKNESS, 8.3, A_SCREW_DIAMETER, 5);
+                receiverPlate(FC_SIZE * 7/6, receiverPlateLen, B_THICKNESS, 0, A_SCREW_DIAMETER, 0);
+                hexGrid(9,9, B_THICKNESS, gridBarWidth, gridInnerDiameter);
+                receiverPlate(FC_SIZE * 7/6, receiverPlateLen, B_THICKNESS, 0, A_SCREW_DIAMETER, 0);
+            }
         }
     
         nazeScrewholes();

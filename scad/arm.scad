@@ -299,6 +299,8 @@ module tricopterVersion()
     bottom_thickness = 3;
     arm_width = WIDTH + 3;
     screw_offset = 13;
+    added_width = 0;
+    wedge_back_distance = 3;
 
     difference()
     {
@@ -306,7 +308,8 @@ module tricopterVersion()
         {
             armBracket(BRACKET_WIDTH, BRACKET_LENGTH, BRACKET_HEIGHT, BRACKET_BAR_WIDTH, BRACKET_ANGLE);
             //armBase(WIDTH, LENGTH/2, HEIGHT, MESH_BAR_WIDTH, MESH_HOLE_SIZE, OUTSIDE_WIDTH);
-            armWedge(arm_width, LENGTH/2, WEDGE_START, WEDGE_HEIGHT, WIDTH);
+            translate([0,-wedge_back_distance, 0])
+            armWedge(arm_width + added_width, LENGTH/2, WEDGE_START, WEDGE_HEIGHT, WIDTH);
         }
         translate([WIDTH / 2 - carbon_arm_width / 2, back_padding, bottom_thickness])
         cube([carbon_arm_width, LENGTH, carbon_arm_width]);
